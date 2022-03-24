@@ -4,4 +4,4 @@ Battleship (also known as Battleships or Sea Battle) is a strategy type guessing
 
 <br><br><br>
 
-# . . . STILL IN PROGRESS . . .
+### . . . STILL IN PROGRESS . . .

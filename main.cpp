@@ -4,31 +4,31 @@
 #include <chrono>
 #include <random>
 #include <string>
-#include <ctype.h>
-
-HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-
-using namespace std;
+#include <cctype>
 
 #define square (char)254
 #define dot (char)250
 #define xchar (char)120
 
+using std::cout, std::cin, std::string, std::array;
+
 class BattleShipMinigame {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     string playerBoard[10][10];
     string enemyBoard[10][10];
-    string gamePhase = "building", whoIsShooting = "player";
+    unsigned short int whoIsShooting = 0;
+    enum { PLAYER, ENEMY, NOONE };
+    enum { BUILDING, SHOOTING, END};
+    unsigned short int gamePhase = 0;
     string listOfAllShips[5] = {"CARRIER", "BATTLESHIP", "CRUISER", "SUBMARINE", "DESTROYER"};
     int playerShips = 5, enemyShips = 5, shipIndex = 0;
-    int CARRIER = 0, BATTLESHIP = 0, CRUISER = 0, SUBMARINE = 0, DESTROYER = 0;
-    int enemyCARRIER = 0, enemyBATTLESHIP = 0, enemyCRUISER = 0, enemySUBMARINE = 0, enemyDESTROYER = 0;
-    int rows = 10, columns = 10;
-    array<int, 2> lastCursorPosition = {0, 0}; // [0] = vertical, [1] = horizontal
-
+    int CARRIER = 0, BATTLESHIP = 0, CRUISER = 0, SUBMARINE = 0, DESTROYER = 0,
+        enemyCARRIER = 0, enemyBATTLESHIP = 0, enemyCRUISER = 0, enemySUBMARINE = 0, enemyDESTROYER = 0;
+    std::array<int, 2> lastCursorPosition = {0, 0}; // [0] = vertical, [1] = horizontal
     public:
     void start() {
         createBoard();
-    };
+   };
 
     private:
     static void clearScreen() {
@@ -68,17 +68,16 @@ class BattleShipMinigame {
     };
 
     static int random(int min, int max) {
-        random_device rd;
-        mt19937::result_type seed = rd() ^ (
-                (mt19937::result_type)
-                        chrono::duration_cast<chrono::seconds>(
-                                chrono::system_clock::now().time_since_epoch()
+        std::random_device rd;
+        std::mt19937::result_type seed = rd() ^ (
+                (std::mt19937::result_type)
+                        std::chrono::duration_cast<std::chrono::seconds>(
+                                std::chrono::system_clock::now().time_since_epoch()
                         ).count() +
-                (mt19937::result_type)
-                        chrono::duration_cast<chrono::microseconds>(
-                                chrono::high_resolution_clock::now().time_since_epoch()
+                (std::mt19937::result_type)
+                        std::chrono::duration_cast<std::chrono::microseconds>(
+                                std::chrono::high_resolution_clock::now().time_since_epoch()
                         ).count());
-
 
         srand(seed);
         return min + (rand() % (max - min + 1));
@@ -100,12 +99,12 @@ class BattleShipMinigame {
         /* check if same ship type is around */
         for(int row = -1;row<2;row++) {
             for(int column = -1;column<2;column++) {
-                if(((currentPosition[0]-1 > -1 || currentPosition[1]-1 > -1) && (currentPosition[0]+1 < 10 || currentPosition[1]+1 < 10)) && ((row != -1 || row != 1) && (column != -1 || column != 1))) {
+                if(((currentPosition[0]-1 > -1 || currentPosition[1]-1 > -1) && (currentPosition[0]+1 < 10 || currentPosition[1]+1 < 10))) {
                     if(playerBoard[currentPosition[0]+row][currentPosition[1]+column] == shipIndicator) {
                         /* Checks direction of the ship */
                         for(int row2 = -1;row2<2;row2++) {
                             for (int column2 = -1; column2 < 2; column2++) {
-                                if((currentPosition[0]+row+row2 != currentPosition[0] && currentPosition[1]+column+column2 != currentPosition[1]) && ((currentPosition[0]-1 > -1 || currentPosition[1]-1 > -1) && (currentPosition[0]+1 < 10 || currentPosition[1]+1 < 10)) && ((row2 != -1 || row2 != 1) && (column2 != -1 || column2 != 1))) {
+                                if((currentPosition[0]+row+row2 != currentPosition[0] && currentPosition[1]+column+column2 != currentPosition[1]) && ((currentPosition[0]-1 > -1 || currentPosition[1]-1 > -1) && (currentPosition[0]+1 < 10 || currentPosition[1]+1 < 10))) {
                                     if(playerBoard[currentPosition[0] + row + row2][currentPosition[1] + column + column2] == shipIndicator) return false; // bad direction
                                 }
                             }
@@ -116,11 +115,9 @@ class BattleShipMinigame {
             }
         }
         /* check if ship already exists (somewhere) */
-        for(unsigned row = 0; row < 10; row++) {
-            for(unsigned column = 0; column < 10; column++) {
-                if(playerBoard[row][column] == shipIndicator) {
-                    return false;
-                }
+        for(auto & row : playerBoard) {
+            for(auto & column : row) {
+                if(column == shipIndicator) return false;
             }
         }
         return true;
@@ -164,7 +161,7 @@ class BattleShipMinigame {
         cout << "|\n|---------------------------------------------|                        |---------------------------------------------|\n";
 
 
-        for (int row = 0; row < rows; row++) {
+        for (int row = 0; row<10; row++) {
             cout << "| ";
             SetConsoleTextAttribute(hConsole, 8);
             cout << row;
@@ -172,9 +169,9 @@ class BattleShipMinigame {
             cout << " |";
 
             // player board
-            for (int column = 0; column < columns; column++) {
+            for (int column = 0; column < 10; column++) {
                 string ship = playerBoard[row][column];
-                if(gamePhase == "building" && row == lastCursorPosition[0] && column == lastCursorPosition[1]) {
+                if(gamePhase == BUILDING && row == lastCursorPosition[0] && column == lastCursorPosition[1]) {
                     if(ship == "C" || ship == "B" || ship == "R" || ship == "S" || ship == "D") {
                         SetConsoleTextAttribute(hConsole, 112);
                         cout << "  " << ship << " ";
@@ -200,8 +197,8 @@ class BattleShipMinigame {
             cout << " |";
 
             // enemy board
-            for (int column = 0; column < columns; column++) {
-                if(gamePhase == "shooting") {
+            for (int column = 0; column < 10; column++) {
+                if(gamePhase == SHOOTING) {
                     string ship = enemyBoard[row][column];
                     if(ship == "X") {
                         SetConsoleTextAttribute(hConsole, 12);
@@ -210,12 +207,12 @@ class BattleShipMinigame {
                     } else if(ship == string(1, xchar)) cout << "  " << xchar << " ";
                     else cout << "  " << dot << " ";
 
-                } else cout << "  " << dot /*enemyBoard[row][column]   ---- SHOWS ENEMY'S SHIP POSITIONS */ << " ";
+                } else cout << "  " << dot << " ";
             }
-            cout << " |" << endl;
+            cout << " |\n";
         }
 
-        if(gamePhase == "building") cout << "--------------- BUILDING PHASE ----------------                        -----------------------------------------------\n\n";
+        if(gamePhase == BUILDING) cout << "--------------- BUILDING PHASE ----------------                        -----------------------------------------------\n\n";
         else {
             cout << "----------------- ";
             SetConsoleTextAttribute(hConsole, 15);
@@ -231,7 +228,7 @@ class BattleShipMinigame {
     };
 
     void printControls() {
-        if(gamePhase == "building") {
+        if(gamePhase == BUILDING) {
             cout << "Currently building ship: ";
             SetConsoleTextAttribute(hConsole, 15);
             cout << listOfAllShips[shipIndex];
@@ -247,15 +244,14 @@ class BattleShipMinigame {
     }
 
     void playerShooting() {
-        whoIsShooting = "player";
         char rowChar, columnChar;
         int row, column;
-        while(whoIsShooting == "player") {
+        while(whoIsShooting == PLAYER) {
             cout << "Row [0-9]:";
             SetConsoleTextAttribute(hConsole, 9);
             cin >> rowChar;
             SetConsoleTextAttribute(hConsole, 7);
-            cout << endl;
+            cout << "\n";
             if(isalpha(rowChar)) row = tolower(rowChar)-97;
             else row = rowChar-48;
 
@@ -264,7 +260,7 @@ class BattleShipMinigame {
                 SetConsoleTextAttribute(hConsole, 9);
                 cin >> columnChar;
                 SetConsoleTextAttribute(hConsole, 7);
-                cout << endl;
+                cout << "\n";
                 if(isalpha(columnChar)) column = tolower(columnChar)-97;
                 else column = columnChar-48;
 
@@ -301,12 +297,13 @@ class BattleShipMinigame {
                         updateBoard();
                         printControls();
                         Sleep(100);
-                        if(enemyShips != 0) {
-                            enemyShooting();
-                        } else if(enemyShips == 0) {
+                        whoIsShooting = ENEMY;
+                        if(enemyShips != 0) return;
+                        else if(enemyShips == 0) {
                             cout << "Player wins";
-                            gamePhase = "end";
-                            whoIsShooting = "no-one";
+                            gamePhase = END;
+                            whoIsShooting = NOONE;
+                            return;
                         }
                     }
                 }
@@ -315,61 +312,68 @@ class BattleShipMinigame {
     };
 
     void enemyShooting() {
-        whoIsShooting = "enemy";
         unsigned row = random(0, 9);
         unsigned column = random(0, 9);
-        while(whoIsShooting == "enemy") {
-            if(row >= 0 && row <= 9) {
-                string character = playerBoard[row][column];
-                if((character != string(1, xchar) || character != "X")) {
-                    if(character == "C" || character == "B" || character == "R" || character == "S" || character == "D") {
-                        SetConsoleTextAttribute(hConsole, 4);
-                        playerBoard[row][column] = "X";
-                        SetConsoleTextAttribute(hConsole, 7);
-                        if(character == "C") {
-                            CARRIER--;
-                            if(CARRIER == 0) playerShips -= 1;
-                        }
-                        else if(character == "B") {
-                            BATTLESHIP--;
-                            if(BATTLESHIP == 0) playerShips -= 1;
-                        }
-                        else if(character == "R") {
-                            CRUISER--;
-                            if(CRUISER == 0) playerShips -= 1;
-                        }
-                        else if(character == "S") {
-                            SUBMARINE--;
-                            if(SUBMARINE == 0) playerShips -= 1;
-                        }
-                        else if(character == "D") {
-                            DESTROYER--;
-                            if(DESTROYER == 0) playerShips -= 1;
-                        }
-                    } else playerBoard[row][column] = xchar;
-                    updateBoard();
-                    printControls();
-                    Sleep(100);
-                    if(playerShips != 0) {
-                        playerShooting();
-                    } else if(enemyShips == 0) {
-                        cout << "Enemy wins";
-                        gamePhase = "end";
-                        whoIsShooting = "no-one";
+        while(whoIsShooting == ENEMY) {
+            string character = playerBoard[row][column];
+            if(character != string(1, xchar) && character != "X") {
+                if(character == "C" || character == "B" || character == "R" || character == "S" || character == "D") {
+                    SetConsoleTextAttribute(hConsole, 4);
+                    playerBoard[row][column] = "X";
+                    SetConsoleTextAttribute(hConsole, 7);
+                    if(character == "C") {
+                        CARRIER--;
+                        if(CARRIER == 0) playerShips -= 1;
                     }
-
+                    else if(character == "B") {
+                        BATTLESHIP--;
+                        if(BATTLESHIP == 0) playerShips -= 1;
+                    }
+                    else if(character == "R") {
+                        CRUISER--;
+                        if(CRUISER == 0) playerShips -= 1;
+                    }
+                    else if(character == "S") {
+                        SUBMARINE--;
+                        if(SUBMARINE == 0) playerShips -= 1;
+                    }
+                    else if(character == "D") {
+                        DESTROYER--;
+                        if(DESTROYER == 0) playerShips -= 1;
+                    }
+                } else playerBoard[row][column] = xchar;
+                updateBoard();
+                printControls();
+                Sleep(100);
+                whoIsShooting = PLAYER;
+                if(playerShips != 0) return;
+                else if(enemyShips == 0) {
+                    cout << "Enemy wins";
+                    gamePhase = END;
+                    whoIsShooting = NOONE;
+                    return;
                 }
             }
         }
 
     };
 
-    void removeCharsFromArray(string character) {
-        for(int i = 0;i<10;i++) {
-            for(int j = 0;j<10;j++) {
-                if(enemyBoard[i][j] == character) enemyBoard[i][j] = dot;
+    void startShootingPhase() {
+        while(true) {
+            if(whoIsShooting == PLAYER) playerShooting();
+            else if(whoIsShooting == ENEMY) enemyShooting();
+            else if(whoIsShooting == NOONE) return;
+        }
+    }
+
+    void removeCharsFromArray(const string& character) {
+        for(auto & i : enemyBoard) {
+            for(auto & j : i) {
+                if(j == character) j = dot;
             }
         }
+
+
     };
 
     void generateEnemyShips() {
@@ -600,7 +604,7 @@ class BattleShipMinigame {
         SetConsoleTextAttribute(hConsole, 7);
         cout << "|\n|---------------------------------------------|                        |---------------------------------------------|\n";
 
-        for(unsigned row = 0; row < rows; row++) {
+        for(unsigned row = 0; row<10; row++) {
             cout << "| ";
             SetConsoleTextAttribute(hConsole, 8);
             cout << row;
@@ -608,7 +612,7 @@ class BattleShipMinigame {
             cout << " |";
 
             // player board
-            for(unsigned column = 0; column < columns; column++) {
+            for(unsigned column = 0; column < 10; column++) {
                 playerBoard[row][column] = dot;
                 if(row == lastCursorPosition[0] && column == lastCursorPosition[1]) {
                     cout << "  " << square << " ";
@@ -623,11 +627,11 @@ class BattleShipMinigame {
             cout << " |";
 
             // enemy board
-            for (unsigned column = 0; column < columns; column++) {
+            for (unsigned column = 0; column < 10; column++) {
                 enemyBoard[row][column] = dot;
                 cout << "  " << dot << " ";
             }
-            cout << " |" << endl;
+            cout << " |\n";
         }
 
         cout << "--------------- BUILDING PHASE ----------------                        --------------- BUILDING PHASE ----------------\n\n";
@@ -783,12 +787,12 @@ class BattleShipMinigame {
 
             } else if(GetAsyncKeyState(VK_F2)) {                // F2 KEY
                 if(CARRIER == 5 && BATTLESHIP == 4 && CRUISER == 3 && SUBMARINE == 3 && DESTROYER == 2) {
-                    gamePhase = "shooting";
+                    gamePhase = SHOOTING;
                     FlushConsoleInputBuffer(GetStdHandle(STD_INPUT_HANDLE));
                     clearScreen();
                     updateBoard();
                     printControls();
-                    playerShooting();
+                    startShootingPhase();
                     break;
                 }
             } else if(GetAsyncKeyState(VK_ESCAPE)) return;

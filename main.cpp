@@ -17,20 +17,20 @@ class BattleShipMinigame {
     string playerBoard[10][10];
     string enemyBoard[10][10];
     unsigned short int whoIsShooting = 0;
+    unsigned short int gamePhase = 0;
     enum { PLAYER, ENEMY, NOONE };
     enum { BUILDING, SHOOTING, END};
-    unsigned short int gamePhase = 0;
     string listOfAllShips[5] = {"CARRIER", "BATTLESHIP", "CRUISER", "SUBMARINE", "DESTROYER"};
-    int playerShips = 5, enemyShips = 5, shipIndex = 0;
-    int CARRIER = 0, BATTLESHIP = 0, CRUISER = 0, SUBMARINE = 0, DESTROYER = 0,
-        enemyCARRIER = 0, enemyBATTLESHIP = 0, enemyCRUISER = 0, enemySUBMARINE = 0, enemyDESTROYER = 0;
-    std::array<int, 2> lastCursorPosition = {0, 0}; // [0] = vertical, [1] = horizontal
-    public:
+    unsigned short int playerShips = 5, enemyShips = 5, shipIndex = 0;
+    unsigned short int CARRIER = 0, BATTLESHIP = 0, CRUISER = 0, SUBMARINE = 0, DESTROYER = 0,
+                       enemyCARRIER = 0, enemyBATTLESHIP = 0, enemyCRUISER = 0, enemySUBMARINE = 0, enemyDESTROYER = 0;
+    array<int, 2> lastCursorPosition = {0, 0}; // [0] = vertical, [1] = horizontal
+public:
     void start() {
         createBoard();
-   };
+    };
 
-    private:
+private:
     static void clearScreen() {
         HANDLE                     hStdOut;
         CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -94,26 +94,47 @@ class BattleShipMinigame {
 //        }
 //    }
 
-    bool canPlaceShip(const string& shipIndicator, array<int, 2> currentPosition) {
+    bool canPlaceShip(const string& shipIndicator) {
+//        for(int row = -1;row<2;row++) {
+//            for(int column = -1;column<2;column++) {
+//                if(((lastCursorPosition[0]-1 > -1 || lastCursorPosition[1]-1 > -1) && (lastCursorPosition[0]+1 < 10 || lastCursorPosition[1]+1 < 10))) {
+//                    if(playerBoard[lastCursorPosition[0]+row][lastCursorPosition[1]+column] == shipIndicator) {
+//                        /* Checks direction of the ship */
+//                        for(int row2 = -1;row2<2;row2++) {
+//                            for (int column2 = -1; column2 < 2; column2++) {
+//                                if((lastCursorPosition[0]+row+row2 != lastCursorPosition[0] && lastCursorPosition[1]+column+column2 != lastCursorPosition[1]) && ((lastCursorPosition[0]-1 > -1 || lastCursorPosition[1]-1 > -1) && (lastCursorPosition[0]+1 < 10 || lastCursorPosition[1]+1 < 10))) {
+//                                    if(playerBoard[lastCursorPosition[0] + row + row2][lastCursorPosition[1] + column + column2] == shipIndicator) return false; // bad direction
+//                                }
+//                            }
+//                        }
+//                        return true;
+//                    }
+//                }
+//            }
+//        }
 
         /* check if same ship type is around */
-        for(int row = -1;row<2;row++) {
-            for(int column = -1;column<2;column++) {
-                if(((currentPosition[0]-1 > -1 || currentPosition[1]-1 > -1) && (currentPosition[0]+1 < 10 || currentPosition[1]+1 < 10))) {
-                    if(playerBoard[currentPosition[0]+row][currentPosition[1]+column] == shipIndicator) {
-                        /* Checks direction of the ship */
-                        for(int row2 = -1;row2<2;row2++) {
-                            for (int column2 = -1; column2 < 2; column2++) {
-                                if((currentPosition[0]+row+row2 != currentPosition[0] && currentPosition[1]+column+column2 != currentPosition[1]) && ((currentPosition[0]-1 > -1 || currentPosition[1]-1 > -1) && (currentPosition[0]+1 < 10 || currentPosition[1]+1 < 10))) {
-                                    if(playerBoard[currentPosition[0] + row + row2][currentPosition[1] + column + column2] == shipIndicator) return false; // bad direction
-                                }
-                            }
-                        }
-                        return true;
-                    }
-                }
-            }
+        if(lastCursorPosition[0]+1 <= 9 && playerBoard[lastCursorPosition[0]+1][lastCursorPosition[1]] == shipIndicator) {
+            if((lastCursorPosition[1]+1 <= 9 && playerBoard[lastCursorPosition[0]+1][lastCursorPosition[1]+1] == shipIndicator) || (lastCursorPosition[1-1] >= 0 && playerBoard[lastCursorPosition[0]+1][lastCursorPosition[1]-1] == shipIndicator))
+                return false; // bad direction
+            else return true;
+
+        } else if(lastCursorPosition[0]-1 >= 0 && playerBoard[lastCursorPosition[0]-1][lastCursorPosition[1]] == shipIndicator) {
+            if((lastCursorPosition[1]+1 <= 9 && playerBoard[lastCursorPosition[0]-1][lastCursorPosition[1]+1] == shipIndicator) || (lastCursorPosition[1-1] >= 0 && playerBoard[lastCursorPosition[0]-1][lastCursorPosition[1]-1] == shipIndicator))
+                return false; // bad direction
+            else return true;
+
+        } else if(lastCursorPosition[1]+1 <= 9 && playerBoard[lastCursorPosition[0]][lastCursorPosition[1]+1] == shipIndicator) {
+            if((lastCursorPosition[0]+1 <= 9 && playerBoard[lastCursorPosition[0]+1][lastCursorPosition[1]+1] == shipIndicator) || (lastCursorPosition[0]-1 >= 0 && playerBoard[lastCursorPosition[0]-1][lastCursorPosition[1]+1] == shipIndicator))
+                return false; // bad direction
+            else return true;
+
+        } else if(lastCursorPosition[1]-1 >= 0 && playerBoard[lastCursorPosition[0]][lastCursorPosition[1]-1] == shipIndicator) {
+            if((lastCursorPosition[0]+1 <= 9 && playerBoard[lastCursorPosition[0]+1][lastCursorPosition[1]-1] == shipIndicator) || (lastCursorPosition[0]-1 >= 0 && playerBoard[lastCursorPosition[0]-1][lastCursorPosition[1]-1] == shipIndicator))
+                return false; // bad direction
+            else return true;
         }
+
         /* check if ship already exists (somewhere) */
         for(auto & row : playerBoard) {
             for(auto & column : row) {
@@ -123,9 +144,9 @@ class BattleShipMinigame {
         return true;
     };
 
-    bool canDeleteLocation(array<int, 2> currentPosition, const string& shipIndicator) {
-        if(currentPosition[0] != 0 && (playerBoard[currentPosition[0]+1][currentPosition[1]] == shipIndicator && playerBoard[currentPosition[0]-1][currentPosition[1]] == shipIndicator)) return false;
-        if(currentPosition[1] != 0 && (playerBoard[currentPosition[0]][currentPosition[1]+1] == shipIndicator && playerBoard[currentPosition[0]][currentPosition[1]-1] == shipIndicator)) return false;
+    bool canDeleteLocation(const string& shipIndicator) {
+        if(lastCursorPosition[0] != 0 && (playerBoard[lastCursorPosition[0]+1][lastCursorPosition[1]] == shipIndicator && playerBoard[lastCursorPosition[0]-1][lastCursorPosition[1]] == shipIndicator)) return false;
+        if(lastCursorPosition[1] != 0 && (playerBoard[lastCursorPosition[0]][lastCursorPosition[1]+1] == shipIndicator && playerBoard[lastCursorPosition[0]][lastCursorPosition[1]-1] == shipIndicator)) return false;
         return true;
     }
 
@@ -234,7 +255,7 @@ class BattleShipMinigame {
             cout << listOfAllShips[shipIndex];
             SetConsoleTextAttribute(hConsole, 10);
 
-            cout << "\n\nW = UP                     C - CHANGE TYPE OF A SHIP\n"
+            cout << "       \n\nW = UP                     C - CHANGE TYPE OF A SHIP\n"
                     "S = DOWN                   F2 - SAVE BOARD - START GAME\n"
                     "A = LEFT                   ESC - END GAME\n"
                     "D = RIGHT\n";
@@ -268,9 +289,7 @@ class BattleShipMinigame {
                     string character = enemyBoard[row][column];
                     if(character != string(1, xchar) && character != "X") {
                         if(character == "C" || character == "B" || character == "R" || character == "S" || character == "D") {
-                            SetConsoleTextAttribute(hConsole, 4);
                             enemyBoard[row][column] = "X";
-                            SetConsoleTextAttribute(hConsole, 7);
                             if(character == "C") {
                                 enemyCARRIER--;
                                 if(enemyCARRIER == 0) enemyShips -= 1;
@@ -296,7 +315,6 @@ class BattleShipMinigame {
                         clearScreen();
                         updateBoard();
                         printControls();
-                        Sleep(100);
                         whoIsShooting = ENEMY;
                         if(enemyShips != 0) return;
                         else if(enemyShips == 0) {
@@ -318,9 +336,7 @@ class BattleShipMinigame {
             string character = playerBoard[row][column];
             if(character != string(1, xchar) && character != "X") {
                 if(character == "C" || character == "B" || character == "R" || character == "S" || character == "D") {
-                    SetConsoleTextAttribute(hConsole, 4);
                     playerBoard[row][column] = "X";
-                    SetConsoleTextAttribute(hConsole, 7);
                     if(character == "C") {
                         CARRIER--;
                         if(CARRIER == 0) playerShips -= 1;
@@ -344,7 +360,6 @@ class BattleShipMinigame {
                 } else playerBoard[row][column] = xchar;
                 updateBoard();
                 printControls();
-                Sleep(100);
                 whoIsShooting = PLAYER;
                 if(playerShips != 0) return;
                 else if(enemyShips == 0) {
@@ -577,13 +592,13 @@ class BattleShipMinigame {
 
     void createBoard() {
         cout << "     _______   ________   _________  _________  __       ______       ______   ___   ___    ________  ______    \n"
-               "    /_______/\\ /_______/\\ /________/\\/________/\\/_/\\     /_____/\\     /_____/\\ /__/\\ /__/\\  /_______/\\/_____/\\   \n"
-               "    \\::: _  \\ \\\\::: _  \\ \\\\__.::.__\\/\\__.::.__\\/\\:\\ \\    \\::::_\\/_    \\::::_\\/_\\::\\ \\\\  \\ \\ \\__.::._\\/\\:::_ \\ \\  \n"
-               "     \\::(_)  \\/_\\::(_)  \\ \\  \\::\\ \\     \\::\\ \\   \\:\\ \\    \\:\\/___/\\    \\:\\/___/\\\\::\\/_\\ .\\ \\   \\::\\ \\  \\:(_) \\ \\ \n"
-               "      \\::  _  \\ \\\\:: __  \\ \\  \\::\\ \\     \\::\\ \\   \\:\\ \\____\\::___\\/_    \\_::._\\:\\\\:: ___::\\ \\  _\\::\\ \\__\\: ___\\/ \n"
-               "       \\::(_)  \\ \\\\:.\\ \\  \\ \\  \\::\\ \\     \\::\\ \\   \\:\\/___/\\\\:\\____/\\     /____\\:\\\\: \\ \\\\::\\ \\/__\\::\\__/\\\\ \\ \\   \n"
-               "        \\_______\\/ \\__\\/\\__\\/   \\__\\/      \\__\\/    \\_____\\/ \\_____\\/     \\_____\\/ \\__\\/ \\::\\/\\________\\/ \\_\\/   \n"
-               "\n\n";
+                "    /_______/\\ /_______/\\ /________/\\/________/\\/_/\\     /_____/\\     /_____/\\ /__/\\ /__/\\  /_______/\\/_____/\\   \n"
+                "    \\::: _  \\ \\\\::: _  \\ \\\\__.::.__\\/\\__.::.__\\/\\:\\ \\    \\::::_\\/_    \\::::_\\/_\\::\\ \\\\  \\ \\ \\__.::._\\/\\:::_ \\ \\  \n"
+                "     \\::(_)  \\/_\\::(_)  \\ \\  \\::\\ \\     \\::\\ \\   \\:\\ \\    \\:\\/___/\\    \\:\\/___/\\\\::\\/_\\ .\\ \\   \\::\\ \\  \\:(_) \\ \\ \n"
+                "      \\::  _  \\ \\\\:: __  \\ \\  \\::\\ \\     \\::\\ \\   \\:\\ \\____\\::___\\/_    \\_::._\\:\\\\:: ___::\\ \\  _\\::\\ \\__\\: ___\\/ \n"
+                "       \\::(_)  \\ \\\\:.\\ \\  \\ \\  \\::\\ \\     \\::\\ \\   \\:\\/___/\\\\:\\____/\\     /____\\:\\\\: \\ \\\\::\\ \\/__\\::\\__/\\\\ \\ \\   \n"
+                "        \\_______\\/ \\__\\/\\__\\/   \\__\\/      \\__\\/    \\_____\\/ \\_____\\/     \\_____\\/ \\__\\/ \\::\\/\\________\\/ \\_\\/   \n"
+                "\n\n";
 
         cout << "----------------- ";
         SetConsoleTextAttribute(hConsole, 15);
@@ -670,7 +685,7 @@ class BattleShipMinigame {
             } else if(GetAsyncKeyState(0x0D)) {                // ENTER KEY
                 string character = playerBoard[lastCursorPosition[0]][lastCursorPosition[1]];
                 if(shipIndex == 0) {
-                    if(character != "C" && canPlaceShip("C", lastCursorPosition)) {
+                    if(character != "C" && canPlaceShip("C")) {
                         if(CARRIER == 5) shipIndex++;
                         else {
                             if(character == "B") BATTLESHIP--;
@@ -686,7 +701,7 @@ class BattleShipMinigame {
                     }
 
                 } else if(shipIndex == 1) {
-                    if(character != "B" && canPlaceShip("B", lastCursorPosition)) {
+                    if(character != "B" && canPlaceShip("B")) {
                         if(BATTLESHIP == 4) shipIndex++;
                         else {
                             if(character == "C") CARRIER--;
@@ -702,7 +717,7 @@ class BattleShipMinigame {
                     }
 
                 } else if(shipIndex == 2) {
-                    if(character != "R" && canPlaceShip("R", lastCursorPosition)) {
+                    if(character != "R" && canPlaceShip("R")) {
                         if(CRUISER == 3) shipIndex++;
                         else {
                             if(character == "C") CARRIER--;
@@ -718,7 +733,7 @@ class BattleShipMinigame {
                     }
 
                 } else if(shipIndex == 3) {
-                    if(character != "S" && canPlaceShip("S", lastCursorPosition)) {
+                    if(character != "S" && canPlaceShip("S")) {
                         if(SUBMARINE == 3) shipIndex++;
                         else {
                             if(character == "C") CARRIER--;
@@ -734,7 +749,7 @@ class BattleShipMinigame {
                     }
 
                 } else if(shipIndex == 4) {
-                    if(character != "D" && canPlaceShip("D", lastCursorPosition)) {
+                    if(character != "D" && canPlaceShip("D")) {
                         if(DESTROYER == 2) shipIndex = 0;
                         else {
                             if(character == "C") CARRIER--;
@@ -753,7 +768,7 @@ class BattleShipMinigame {
 
             } else if(GetAsyncKeyState(VK_BACK)) {              // BACKSPACE KEY
                 string character = playerBoard[lastCursorPosition[0]][lastCursorPosition[1]];
-                if(canDeleteLocation(lastCursorPosition, character)) {
+                if(canDeleteLocation(character)) {
                     if(character == "C") {
                         playerBoard[lastCursorPosition[0]][lastCursorPosition[1]] = dot;
                         shipIndex = 0;

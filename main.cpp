@@ -6,24 +6,24 @@
 #include <string>
 #include <cctype>
 
-#define square (char)254
-#define dot (char)250
-#define xchar (char)120
+#define square string(1, (char)254)
+#define dot string(1, (char)250)
+#define xchar string(1, (char)120)
 
 using std::cout, std::cin, std::string, std::array;
 
 class BattleShipMinigame {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    string playerBoard[10][10];
-    string enemyBoard[10][10];
+    string playerBoard[10][10] = {};
+    string enemyBoard[10][10] = {};
     unsigned short int whoIsShooting = 0;
     unsigned short int gamePhase = 0;
     enum { PLAYER, ENEMY, NOONE };
-    enum { BUILDING, SHOOTING, END};
+    enum { BUILDING, SHOOTING, END };
     string listOfAllShips[5] = {"CARRIER", "BATTLESHIP", "CRUISER", "SUBMARINE", "DESTROYER"};
     unsigned short int playerShips = 5, enemyShips = 5, shipIndex = 0;
     unsigned short int CARRIER = 0, BATTLESHIP = 0, CRUISER = 0, SUBMARINE = 0, DESTROYER = 0,
-                       enemyCARRIER = 0, enemyBATTLESHIP = 0, enemyCRUISER = 0, enemySUBMARINE = 0, enemyDESTROYER = 0;
+                        enemyCARRIER = 0, enemyBATTLESHIP = 0, enemyCRUISER = 0, enemySUBMARINE = 0, enemyDESTROYER = 0;
     array<int, 2> lastCursorPosition = {0, 0}; // [0] = vertical, [1] = horizontal
 public:
     void start() {
@@ -160,9 +160,8 @@ private:
                 "      \\::  _  \\ \\\\:: __  \\ \\  \\::\\ \\     \\::\\ \\   \\:\\ \\____\\::___\\/_    \\_::._\\:\\\\:: ___::\\ \\  _\\::\\ \\__\\: ___\\/ \n"
                 "       \\::(_)  \\ \\\\:.\\ \\  \\ \\  \\::\\ \\     \\::\\ \\   \\:\\/___/\\\\:\\____/\\     /____\\:\\\\: \\ \\\\::\\ \\/__\\::\\__/\\\\ \\ \\   \n"
                 "        \\_______\\/ \\__\\/\\__\\/   \\__\\/      \\__\\/    \\_____\\/ \\_____\\/     \\_____\\/ \\__\\/ \\::\\/\\________\\/ \\_\\/   \n"
-                "\n\n";
+                "\n\n----------------- ";
 
-        cout << "----------------- ";
         SetConsoleTextAttribute(hConsole, 15);
         cout << "YOUR BOARD";
         SetConsoleTextAttribute(hConsole, 7);
@@ -206,7 +205,7 @@ private:
                     if(ship == "X") {
                         SetConsoleTextAttribute(hConsole, 12);
                         cout << "  X ";
-                    } else if(ship == string(1, xchar)) cout << "  " << xchar << " ";
+                    } else if(ship == xchar) cout << "  " << xchar << " ";
                     else cout << "  " << ship << " ";
                 }
                 SetConsoleTextAttribute(hConsole, 7);
@@ -225,7 +224,7 @@ private:
                         SetConsoleTextAttribute(hConsole, 12);
                         cout << "  X ";
                         SetConsoleTextAttribute(hConsole, 7);
-                    } else if(ship == string(1, xchar)) cout << "  " << xchar << " ";
+                    } else if(ship == xchar) cout << "  " << xchar << " ";
                     else cout << "  " << dot << " ";
 
                 } else cout << "  " << dot << " ";
@@ -287,7 +286,7 @@ private:
 
                 if(column >= 0 && column <= 9) {
                     string character = enemyBoard[row][column];
-                    if(character != string(1, xchar) && character != "X") {
+                    if(character != xchar && character != "X") {
                         if(character == "C" || character == "B" || character == "R" || character == "S" || character == "D") {
                             enemyBoard[row][column] = "X";
                             if(character == "C") {
@@ -334,7 +333,7 @@ private:
         unsigned column = random(0, 9);
         while(whoIsShooting == ENEMY) {
             string character = playerBoard[row][column];
-            if(character != string(1, xchar) && character != "X") {
+            if(character != xchar && character != "X") {
                 if(character == "C" || character == "B" || character == "R" || character == "S" || character == "D") {
                     playerBoard[row][column] = "X";
                     if(character == "C") {
@@ -387,8 +386,6 @@ private:
                 if(j == character) j = dot;
             }
         }
-
-
     };
 
     void generateEnemyShips() {
@@ -406,7 +403,7 @@ private:
                 if(randomDirection == 0) rowIncrement = rowIncrement-1;
                 else if(randomDirection == 1) columnIncrement = columnIncrement-1;
 
-            } else if(character == string(1, dot)) {
+            } else if(character == dot) {
                 enemyBoard[randomRow + rowIncrement][randomColumn + columnIncrement] = "C";
                 enemyCARRIER++;
             }
@@ -445,7 +442,7 @@ private:
                 if(randomDirection == 0) rowIncrement = rowIncrement-1;
                 else if(randomDirection == 1) columnIncrement = columnIncrement-1;
 
-            } else if(character == string(1, dot)) {
+            } else if(character == dot) {
                 enemyBoard[randomRow + rowIncrement][randomColumn + columnIncrement] = "B";
                 enemyBATTLESHIP++;
             }
@@ -484,7 +481,7 @@ private:
                 if(randomDirection == 0) rowIncrement = rowIncrement-1;
                 else if(randomDirection == 1) columnIncrement = columnIncrement-1;
 
-            } else if(character == string(1, dot)) {
+            } else if(character == dot) {
                 enemyBoard[randomRow + rowIncrement][randomColumn + columnIncrement] = "R";
                 enemyCRUISER++;
             }
@@ -523,7 +520,7 @@ private:
                 if(randomDirection == 0) rowIncrement = rowIncrement-1;
                 else if(randomDirection == 1) columnIncrement = columnIncrement-1;
 
-            } else if(character == string(1, dot)) {
+            } else if(character == dot) {
                 enemyBoard[randomRow + rowIncrement][randomColumn + columnIncrement] = "S";
                 enemySUBMARINE++;
             }
@@ -562,7 +559,7 @@ private:
                 if(randomDirection == 0) rowIncrement = rowIncrement-1;
                 else if(randomDirection == 1) columnIncrement = columnIncrement-1;
 
-            } else if(character == string(1, dot)) {
+            } else if(character == dot) {
                 enemyBoard[randomRow + rowIncrement][randomColumn + columnIncrement] = "D";
                 enemyDESTROYER++;
             }
@@ -598,9 +595,8 @@ private:
                 "      \\::  _  \\ \\\\:: __  \\ \\  \\::\\ \\     \\::\\ \\   \\:\\ \\____\\::___\\/_    \\_::._\\:\\\\:: ___::\\ \\  _\\::\\ \\__\\: ___\\/ \n"
                 "       \\::(_)  \\ \\\\:.\\ \\  \\ \\  \\::\\ \\     \\::\\ \\   \\:\\/___/\\\\:\\____/\\     /____\\:\\\\: \\ \\\\::\\ \\/__\\::\\__/\\\\ \\ \\   \n"
                 "        \\_______\\/ \\__\\/\\__\\/   \\__\\/      \\__\\/    \\_____\\/ \\_____\\/     \\_____\\/ \\__\\/ \\::\\/\\________\\/ \\_\\/   \n"
-                "\n\n";
+                "\n\n----------------- ";
 
-        cout << "----------------- ";
         SetConsoleTextAttribute(hConsole, 15);
         cout << "YOUR BOARD";
         SetConsoleTextAttribute(hConsole, 7);
@@ -653,6 +649,7 @@ private:
         generateEnemyShips();
         printControls();
 
+        // key logs
         while(true) {
             if(GetAsyncKeyState(0x41)) {                        // A - LEFT KEY
                 if(lastCursorPosition[1] != 0) {
@@ -808,7 +805,7 @@ private:
                     updateBoard();
                     printControls();
                     startShootingPhase();
-                    break;
+                    return;
                 }
             } else if(GetAsyncKeyState(VK_ESCAPE)) return;
             Sleep(100);

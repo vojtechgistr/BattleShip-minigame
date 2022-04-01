@@ -4,6 +4,5 @@ Battleship (also known as Battleships or Sea Battle) is a strategy type guessing
 STILL IN PROGRESS
 
 **TO DO:**
-
 - FIX: *terminate called after throwing an instance of 'std::logic_error' what(): basic_string::_M_construct null not valid*
 - ADD: *Logic of shooting for the enemy (currently only random)*

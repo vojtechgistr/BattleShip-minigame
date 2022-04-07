@@ -12,61 +12,65 @@
 
 using std::cout, std::cin, std::string, std::array;
 
+static void clearScreen() {
+    HANDLE                     hStdOut;
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    DWORD                      count;
+    DWORD                      cellCount;
+    COORD                      homeCoords = { 0, 0 };
+
+    hStdOut = GetStdHandle( STD_OUTPUT_HANDLE );
+    if (hStdOut == INVALID_HANDLE_VALUE) return;
+
+    /* Get the number of cells in the current buffer */
+    if (!GetConsoleScreenBufferInfo( hStdOut, &csbi )) return;
+    cellCount = csbi.dwSize.X *csbi.dwSize.Y;
+
+    /* Fill the entire buffer with spaces */
+    if (!FillConsoleOutputCharacter(
+            hStdOut,
+            (TCHAR) ' ',
+            cellCount,
+            homeCoords,
+            &count
+    )) return;
+
+    /* Fill the entire buffer with the current colors and attributes */
+    if (!FillConsoleOutputAttribute(
+            hStdOut,
+            csbi.wAttributes,
+            cellCount,
+            homeCoords,
+            &count
+    )) return;
+
+    /* Move the cursor home */
+    SetConsoleCursorPosition( hStdOut, homeCoords );
+};
+
 class BattleShipMinigame {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    string playerBoard[10][10] = {};
-    string enemyBoard[10][10] = {};
+    string playerBoard[10][10];
+    string enemyBoard[10][10];
     unsigned short int whoIsShooting = 0;
     unsigned short int gamePhase = 0;
     enum { PLAYER, ENEMY, NOONE };
     enum { BUILDING, SHOOTING, END };
-    string listOfAllShips[5] = {"CARRIER", "BATTLESHIP", "CRUISER", "SUBMARINE", "DESTROYER"};
-    unsigned short int playerShips = 5, enemyShips = 5, shipIndex = 0;
+    enum { UNKNOWN, VERTICAL_UP, VERTICAL_DOWN, HORIZONTAL_RIGHT, HORIZONTAL_LEFT};
+    const string listOfAllShips[5] = {"CARRIER", "BATTLESHIP", "CRUISER", "SUBMARINE", "DESTROYER"};
+    unsigned short int playerShips = 5, enemyShips = 5, shipIndex = 0, playerShipsBeforeEnemyShooting = 5;
     unsigned short int CARRIER = 0, BATTLESHIP = 0, CRUISER = 0, SUBMARINE = 0, DESTROYER = 0,
                         enemyCARRIER = 0, enemyBATTLESHIP = 0, enemyCRUISER = 0, enemySUBMARINE = 0, enemyDESTROYER = 0;
-    array<int, 2> lastCursorPosition = {0, 0}; // [0] = vertical, [1] = horizontal
+    array<short int, 2> lastCursorPosition = {0, 0}; // [0] = vertical, [1] = horizontal
+    array<short int, 2> lastShot = {-1, -1}; // stores an enemy shot to the player
+    string characterLookingFor = "";
+    unsigned short int shotDirection = UNKNOWN; // stores an enemy shot direction
 public:
     void start() {
         createBoard();
     };
 
 private:
-    static void clearScreen() {
-        HANDLE                     hStdOut;
-        CONSOLE_SCREEN_BUFFER_INFO csbi;
-        DWORD                      count;
-        DWORD                      cellCount;
-        COORD                      homeCoords = { 0, 0 };
-
-        hStdOut = GetStdHandle( STD_OUTPUT_HANDLE );
-        if (hStdOut == INVALID_HANDLE_VALUE) return;
-
-        /* Get the number of cells in the current buffer */
-        if (!GetConsoleScreenBufferInfo( hStdOut, &csbi )) return;
-        cellCount = csbi.dwSize.X *csbi.dwSize.Y;
-
-        /* Fill the entire buffer with spaces */
-        if (!FillConsoleOutputCharacter(
-                hStdOut,
-                (TCHAR) ' ',
-                cellCount,
-                homeCoords,
-                &count
-        )) return;
-
-        /* Fill the entire buffer with the current colors and attributes */
-        if (!FillConsoleOutputAttribute(
-                hStdOut,
-                csbi.wAttributes,
-                cellCount,
-                homeCoords,
-                &count
-        )) return;
-
-        /* Move the cursor home */
-        SetConsoleCursorPosition( hStdOut, homeCoords );
-    };
-
     static int random(int min, int max) {
         std::random_device rd;
         std::mt19937::result_type seed = rd() ^ (
@@ -329,46 +333,102 @@ private:
     };
 
     void enemyShooting() {
-        unsigned row = random(0, 9);
-        unsigned column = random(0, 9);
-        while(whoIsShooting == ENEMY) {
-            string character = playerBoard[row][column];
-            if(character != xchar && character != "X") {
-                if(character == "C" || character == "B" || character == "R" || character == "S" || character == "D") {
-                    playerBoard[row][column] = "X";
-                    if(character == "C") {
-                        CARRIER--;
-                        if(CARRIER == 0) playerShips -= 1;
+        int row;
+        int column;
+
+        if(lastShot[0] == -1 && shotDirection == UNKNOWN) {
+            row = random(0, 9);
+            column = random(0, 9);
+        } else {
+            row = lastShot[0];
+            column = lastShot[1];
+            string character = playerBoard[row-1][column];
+
+            if(shotDirection == UNKNOWN) {
+                if(row-1 >= 0 && character == characterLookingFor) {
+                    shotDirection = VERTICAL_UP;
+
+                    if(row-1 == 0) {
+                        if((character == "C" && CARRIER != 0) || (character == "B" && BATTLESHIP != 0) || (character == "R" && CRUISER != 0) || (character == "S" && SUBMARINE != 0) || (character == "D" && DESTROYER != 0)) shotDirection = VERTICAL_DOWN;
+                        else if((character == "C" && CARRIER == 0) || (character == "B" && BATTLESHIP == 0) || (character == "R" && CRUISER == 0) || (character == "S" && SUBMARINE == 0) || (character == "D" && DESTROYER == 0)) {
+
+                        }
                     }
-                    else if(character == "B") {
-                        BATTLESHIP--;
-                        if(BATTLESHIP == 0) playerShips -= 1;
-                    }
-                    else if(character == "R") {
-                        CRUISER--;
-                        if(CRUISER == 0) playerShips -= 1;
-                    }
-                    else if(character == "S") {
-                        SUBMARINE--;
-                        if(SUBMARINE == 0) playerShips -= 1;
-                    }
-                    else if(character == "D") {
-                        DESTROYER--;
-                        if(DESTROYER == 0) playerShips -= 1;
-                    }
-                } else playerBoard[row][column] = xchar;
-                updateBoard();
-                printControls();
-                whoIsShooting = PLAYER;
-                if(playerShips != 0) return;
-                else if(enemyShips == 0) {
-                    cout << "Enemy wins";
-                    gamePhase = END;
-                    whoIsShooting = NOONE;
-                    return;
+                    row -= 1;
+                } else if(row+1 <= 9 && character == characterLookingFor) {
+                    shotDirection = VERTICAL_DOWN;
+                    row += 1;
+
+                } else if(column-1 <= 9 && character == characterLookingFor) {
+                    shotDirection = HORIZONTAL_LEFT;
+                    column -= 1;
+
+                } else if(column+1 <= 9 && character == characterLookingFor) {
+                    shotDirection = HORIZONTAL_RIGHT;
+                    column += 1;
+
                 }
+
+            } else if(shotDirection == VERTICAL_UP) {
+
+
+            } else if(shotDirection == VERTICAL_DOWN) {
+
+
+            } else if(shotDirection == HORIZONTAL_RIGHT) {
+
+
+            } else if(shotDirection == HORIZONTAL_LEFT) {
+
+
             }
         }
+
+//        while(whoIsShooting == ENEMY) {
+//            string character = playerBoard[row][column];
+//            if(character != xchar && character != "X") {
+//                if(character == "C" || character == "B" || character == "R" || character == "S" || character == "D") {
+//                    playerBoard[row][column] = "X";
+//
+//                    if(character == "C") {
+//                        CARRIER--;
+//                        if(CARRIER == 0) playerShips -= 1;
+//                        characterLookingFor = "C";
+//                    }
+//                    else if(character == "B") {
+//                        BATTLESHIP--;
+//                        if(BATTLESHIP == 0) playerShips -= 1;
+//                        characterLookingFor = "B";
+//                    }
+//                    else if(character == "R") {
+//                        CRUISER--;
+//                        if(CRUISER == 0) playerShips -= 1;
+//                        characterLookingFor = "R";
+//                    }
+//                    else if(character == "S") {
+//                        SUBMARINE--;
+//                        if(SUBMARINE == 0) playerShips -= 1;
+//                        characterLookingFor = "S";
+//                    }
+//                    else if(character == "D") {
+//                        DESTROYER--;
+//                        if(DESTROYER == 0) playerShips -= 1;
+//                        characterLookingFor = "D";
+//                    }
+//                } else playerBoard[row][column] = xchar;
+//
+//                updateBoard();
+//                printControls();
+//                whoIsShooting = PLAYER;
+//                if(playerShips != 0) return;
+//                else if(enemyShips == 0) {
+//                    cout << "Enemy wins";
+//                    gamePhase = END;
+//                    whoIsShooting = NOONE;
+//                    return;
+//                }
+//            }
+//        }
 
     };
 
@@ -389,33 +449,46 @@ private:
     };
 
     void generateEnemyShips() {
-        int randomRow = random(0, 9);
-        int randomColumn = random(0, 9);
-        int randomDirection = random(0, 1);   // 0 = vertical, 1 = horizontal
-        int rowIncrement = 0;
-        int columnIncrement = 0;
-        int tries = 0;
+        unsigned short int randomRow = random(0, 9);
+        unsigned short int randomColumn = random(0, 9);
+        unsigned short int randomDirection = random(0, 1);   // 0 = vertical, 1 = horizontal
+        short int rowIncrement = 0;
+        short int columnIncrement = 0;
+        unsigned short int tries = 0;
+        enum { YES, NO };
+        unsigned short int canIncrement = YES;
 
         // CARRIER
         while(enemyCARRIER != 5) {
+            if(randomRow+rowIncrement < 0 || randomColumn+columnIncrement < 0 || randomRow+rowIncrement > 9 || randomColumn+columnIncrement > 9) {
+                if(randomDirection == 0) rowIncrement = -1;
+                else if(randomDirection == 1) columnIncrement = -1;
+                tries++;
+                canIncrement = NO;
+            }
+
             string character = enemyBoard[randomRow+rowIncrement][randomColumn+columnIncrement];
-            if((character == "B" || character == "R" || character == "S" || character == "D") || randomRow+rowIncrement < 0 || randomColumn+columnIncrement < 0 || randomRow+rowIncrement > 9 || randomColumn+columnIncrement > 9) {
-                if(randomDirection == 0) rowIncrement = rowIncrement-1;
-                else if(randomDirection == 1) columnIncrement = columnIncrement-1;
+            if(character == "B" || character == "R" || character == "S" || character == "D") {
+                if(randomDirection == 0) rowIncrement = -1;
+                else if(randomDirection == 1) columnIncrement = -1;
+                tries++;
+                canIncrement = NO;
 
             } else if(character == dot) {
                 enemyBoard[randomRow + rowIncrement][randomColumn + columnIncrement] = "C";
                 enemyCARRIER++;
             }
 
-            if(randomDirection == 0) {
-                if(rowIncrement > -1) rowIncrement++;
-                else rowIncrement--;
+            if(canIncrement == YES) {
+                if(randomDirection == 0) {
+                    if(rowIncrement > -1) rowIncrement++;
+                    else rowIncrement--;
 
-            } else if(randomDirection == 1) {
-                if(columnIncrement > -1) columnIncrement++;
-                else columnIncrement--;
-            }
+                } else if(randomDirection == 1) {
+                    if(columnIncrement > -1) columnIncrement++;
+                    else columnIncrement--;
+                }
+            } else canIncrement = YES;
 
             if(tries == 10) {
                 removeCharsFromArray("C");
@@ -426,7 +499,7 @@ private:
                 rowIncrement = 0;
                 columnIncrement = 0;
                 tries = 0;
-            } else tries++;
+            }
         }
 
         // BATTLESHIP
@@ -437,24 +510,35 @@ private:
         columnIncrement = 0;
         tries = 0;
         while(enemyBATTLESHIP != 4) {
+            if(randomRow+rowIncrement < 0 || randomColumn+columnIncrement < 0 || randomRow+rowIncrement > 9 || randomColumn+columnIncrement > 9) {
+                if(randomDirection == 0) rowIncrement = -1;
+                else if(randomDirection == 1) columnIncrement = -1;
+                tries++;
+                canIncrement = NO;
+            }
+
             string character = enemyBoard[randomRow+rowIncrement][randomColumn+columnIncrement];
-            if((character == "C" || character == "R" || character == "S" || character == "D") || randomRow+rowIncrement < 0 || randomColumn+columnIncrement < 0 || randomRow+rowIncrement > 9 || randomColumn+columnIncrement > 9) {
-                if(randomDirection == 0) rowIncrement = rowIncrement-1;
-                else if(randomDirection == 1) columnIncrement = columnIncrement-1;
+            if(character == "C" || character == "R" || character == "S" || character == "D") {
+                if(randomDirection == 0) rowIncrement = -1;
+                else if(randomDirection == 1) columnIncrement = -1;
+                tries++;
+                canIncrement = NO;
 
             } else if(character == dot) {
                 enemyBoard[randomRow + rowIncrement][randomColumn + columnIncrement] = "B";
                 enemyBATTLESHIP++;
             }
 
-            if(randomDirection == 0) {
-                if(rowIncrement > -1) rowIncrement++;
-                else rowIncrement--;
+            if(canIncrement == YES) {
+                if(randomDirection == 0) {
+                    if(rowIncrement > -1) rowIncrement++;
+                    else rowIncrement--;
 
-            } else if(randomDirection == 1) {
-                if(columnIncrement > -1) columnIncrement++;
-                else columnIncrement--;
-            }
+                } else if(randomDirection == 1) {
+                    if(columnIncrement > -1) columnIncrement++;
+                    else columnIncrement--;
+                }
+            } else canIncrement = YES;
 
             if(tries == 10) {
                 removeCharsFromArray("B");
@@ -465,7 +549,7 @@ private:
                 rowIncrement = 0;
                 columnIncrement = 0;
                 tries = 0;
-            } else tries++;
+            }
         }
 
         // CRUISER
@@ -476,24 +560,35 @@ private:
         columnIncrement = 0;
         tries = 0;
         while(enemyCRUISER != 3) {
+            if(randomRow+rowIncrement < 0 || randomColumn+columnIncrement < 0 || randomRow+rowIncrement > 9 || randomColumn+columnIncrement > 9) {
+                if(randomDirection == 0) rowIncrement = -1;
+                else if(randomDirection == 1) columnIncrement = -1;
+                tries++;
+                canIncrement = NO;
+            }
+
             string character = enemyBoard[randomRow+rowIncrement][randomColumn+columnIncrement];
-            if((character == "B" || character == "C" || character == "S" || character == "D") || randomRow+rowIncrement < 0 || randomColumn+columnIncrement < 0 || randomRow+rowIncrement > 9 || randomColumn+columnIncrement > 9) {
-                if(randomDirection == 0) rowIncrement = rowIncrement-1;
-                else if(randomDirection == 1) columnIncrement = columnIncrement-1;
+            if(character == "B" || character == "C" || character == "S" || character == "D") {
+                if(randomDirection == 0) rowIncrement = -1;
+                else if(randomDirection == 1) columnIncrement = -1;
+                tries++;
+                canIncrement = NO;
 
             } else if(character == dot) {
                 enemyBoard[randomRow + rowIncrement][randomColumn + columnIncrement] = "R";
                 enemyCRUISER++;
             }
 
-            if(randomDirection == 0) {
-                if(rowIncrement > -1) rowIncrement++;
-                else rowIncrement--;
+            if(canIncrement == YES) {
+                if(randomDirection == 0) {
+                    if(rowIncrement > -1) rowIncrement++;
+                    else rowIncrement--;
 
-            } else if(randomDirection == 1) {
-                if(columnIncrement > -1) columnIncrement++;
-                else columnIncrement--;
-            }
+                } else if(randomDirection == 1) {
+                    if(columnIncrement > -1) columnIncrement++;
+                    else columnIncrement--;
+                }
+            } else canIncrement = YES;
 
             if(tries == 10) {
                 removeCharsFromArray("R");
@@ -504,7 +599,7 @@ private:
                 rowIncrement = 0;
                 columnIncrement = 0;
                 tries = 0;
-            } else tries++;
+            }
         }
 
         // SUBMARINE
@@ -515,24 +610,35 @@ private:
         columnIncrement = 0;
         tries = 0;
         while(enemySUBMARINE != 3) {
+            if(randomRow+rowIncrement < 0 || randomColumn+columnIncrement < 0 || randomRow+rowIncrement > 9 || randomColumn+columnIncrement > 9) {
+                if(randomDirection == 0) rowIncrement = -1;
+                else if(randomDirection == 1) columnIncrement = -1;
+                tries++;
+                canIncrement = NO;
+            }
+
             string character = enemyBoard[randomRow+rowIncrement][randomColumn+columnIncrement];
-            if((character == "B" || character == "R" || character == "C" || character == "D") || randomRow+rowIncrement < 0 || randomColumn+columnIncrement < 0 || randomRow+rowIncrement > 9 || randomColumn+columnIncrement > 9) {
-                if(randomDirection == 0) rowIncrement = rowIncrement-1;
-                else if(randomDirection == 1) columnIncrement = columnIncrement-1;
+            if(character == "B" || character == "R" || character == "C" || character == "D") {
+                if(randomDirection == 0) rowIncrement = -1;
+                else if(randomDirection == 1) columnIncrement = -1;
+                tries++;
+                canIncrement = NO;
 
             } else if(character == dot) {
                 enemyBoard[randomRow + rowIncrement][randomColumn + columnIncrement] = "S";
                 enemySUBMARINE++;
             }
 
-            if(randomDirection == 0) {
-                if(rowIncrement > -1) rowIncrement++;
-                else rowIncrement--;
+            if(canIncrement == YES) {
+                if(randomDirection == 0) {
+                    if(rowIncrement > -1) rowIncrement++;
+                    else rowIncrement--;
 
-            } else if(randomDirection == 1) {
-                if(columnIncrement > -1) columnIncrement++;
-                else columnIncrement--;
-            }
+                } else if(randomDirection == 1) {
+                    if(columnIncrement > -1) columnIncrement++;
+                    else columnIncrement--;
+                }
+            } else canIncrement = YES;
 
             if(tries == 10) {
                 removeCharsFromArray("S");
@@ -543,7 +649,7 @@ private:
                 rowIncrement = 0;
                 columnIncrement = 0;
                 tries = 0;
-            } else tries++;
+            }
         }
 
         // DESTROYER
@@ -554,24 +660,35 @@ private:
         columnIncrement = 0;
         tries = 0;
         while(enemyDESTROYER != 2) {
+            if(randomRow+rowIncrement < 0 || randomColumn+columnIncrement < 0 || randomRow+rowIncrement > 9 || randomColumn+columnIncrement > 9) {
+                if(randomDirection == 0) rowIncrement = -1;
+                else if(randomDirection == 1) columnIncrement = -1;
+                tries++;
+                canIncrement = NO;
+            }
+
             string character = enemyBoard[randomRow+rowIncrement][randomColumn+columnIncrement];
-            if((character == "B" || character == "R" || character == "S" || character == "C") || randomRow+rowIncrement < 0 || randomColumn+columnIncrement < 0 || randomRow+rowIncrement > 9 || randomColumn+columnIncrement > 9) {
-                if(randomDirection == 0) rowIncrement = rowIncrement-1;
-                else if(randomDirection == 1) columnIncrement = columnIncrement-1;
+            if(character == "B" || character == "R" || character == "S" || character == "C") {
+                if(randomDirection == 0) rowIncrement = -1;
+                else if(randomDirection == 1) columnIncrement = -1;
+                tries++;
+                canIncrement = NO;
 
             } else if(character == dot) {
                 enemyBoard[randomRow + rowIncrement][randomColumn + columnIncrement] = "D";
                 enemyDESTROYER++;
             }
 
-            if(randomDirection == 0) {
-                if(rowIncrement > -1) rowIncrement++;
-                else rowIncrement--;
+            if(canIncrement == YES) {
+                if(randomDirection == 0) {
+                    if(rowIncrement > -1) rowIncrement++;
+                    else rowIncrement--;
 
-            } else if(randomDirection == 1) {
-                if(columnIncrement > -1) columnIncrement++;
-                else columnIncrement--;
-            }
+                } else if(randomDirection == 1) {
+                    if(columnIncrement > -1) columnIncrement++;
+                    else columnIncrement--;
+                }
+            } else canIncrement = YES;
 
             if(tries == 10) {
                 removeCharsFromArray("D");
@@ -582,7 +699,7 @@ private:
                 rowIncrement = 0;
                 columnIncrement = 0;
                 tries = 0;
-            } else tries++;
+            }
         }
 
     };
@@ -760,7 +877,6 @@ private:
                             if(DESTROYER == 2) shipIndex = 0;
                         }
                     }
-
                 }
 
             } else if(GetAsyncKeyState(VK_BACK)) {              // BACKSPACE KEY
@@ -814,8 +930,21 @@ private:
 };
 
 int main() {
-    BattleShipMinigame game;
-    game.start();
 
+    for (int num_attempts = 0; num_attempts < 5; num_attempts++) {
+        try {
+            BattleShipMinigame game;
+            game.start();
+            break;
+        } catch (const std::bad_alloc&) {
+            // bad allocation, trying again
+            clearScreen();
+        }
+    }
+
+// Handle too many failed attempts here.
+    std::cout << "Too many attempts, start failed.";
+    string test;
+    cin >> test;
     return 0;
 }

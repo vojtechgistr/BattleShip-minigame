@@ -46,7 +46,7 @@ static void clearScreen() {
 
     /* Move the cursor home */
     SetConsoleCursorPosition( hStdOut, homeCoords );
-};
+}
 
 class BattleShipMinigame {
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -58,11 +58,11 @@ class BattleShipMinigame {
     enum { BUILDING, SHOOTING, END };
     enum { UNKNOWN, VERTICAL_UP, VERTICAL_DOWN, HORIZONTAL_RIGHT, HORIZONTAL_LEFT};
     const string listOfAllShips[5] = {"CARRIER", "BATTLESHIP", "CRUISER", "SUBMARINE", "DESTROYER"};
-    unsigned short int playerShips = 5, enemyShips = 5, shipIndex = 0, playerShipsBeforeEnemyShooting = 5;
+    unsigned short int playerShips = 5, enemyShips = 5, shipIndex = 0;
     unsigned short int CARRIER = 0, BATTLESHIP = 0, CRUISER = 0, SUBMARINE = 0, DESTROYER = 0,
-                        enemyCARRIER = 0, enemyBATTLESHIP = 0, enemyCRUISER = 0, enemySUBMARINE = 0, enemyDESTROYER = 0;
-    array<short int, 2> lastCursorPosition = {0, 0}; // [0] = vertical, [1] = horizontal
-    array<short int, 2> lastShot = {-1, -1}; // stores an enemy shot to the player
+            enemyCARRIER = 0, enemyBATTLESHIP = 0, enemyCRUISER = 0, enemySUBMARINE = 0, enemyDESTROYER = 0;
+    array<int, 2> lastCursorPosition = {0, 0}; // [0] = vertical, [1] = horizontal
+    array<int, 2> lastShot = {-1, -1}; // stores an enemy shot to the player
     string characterLookingFor = "";
     unsigned short int shotDirection = UNKNOWN; // stores an enemy shot direction
 public:
@@ -336,99 +336,396 @@ private:
         int row;
         int column;
 
-        if(lastShot[0] == -1 && shotDirection == UNKNOWN) {
-            row = random(0, 9);
-            column = random(0, 9);
+        if(lastShot[0] == -1) {
+            while(whoIsShooting == ENEMY) {
+                row = random(0, 9);
+                column = random(0, 9);
+
+                string character = playerBoard[row][column];
+                if(character != xchar && character != "X") {
+                    if(character == "C" || character == "B" || character == "R" || character == "S" || character == "D") {
+                        playerBoard[row][column] = "X";
+
+                        if(character == "C") {
+                            CARRIER--;
+                            if(CARRIER == 0) {
+                                playerShips -= 1;
+                                characterLookingFor = "";
+                                lastShot[0] = -1;
+                                lastShot[1] = -1;
+                            } else {
+                                characterLookingFor = "C";
+                                lastShot[0] = row;
+                                lastShot[1] = column;
+                            }
+                        }
+                        else if(character == "B") {
+                            BATTLESHIP--;
+                            if(BATTLESHIP == 0) {
+                                playerShips -= 1;
+                                characterLookingFor = "";
+                                lastShot[0] = -1;
+                                lastShot[1] = -1;
+                            } else {
+                                characterLookingFor = "B";
+                                lastShot[0] = row;
+                                lastShot[1] = column;
+                            }
+                        }
+                        else if(character == "R") {
+                            CRUISER--;
+                            if(CRUISER == 0) {
+                                playerShips -= 1;
+                                characterLookingFor = "";
+                                lastShot[0] = -1;
+                                lastShot[1] = -1;
+                            } else {
+                                characterLookingFor = "R";
+                                lastShot[0] = row;
+                                lastShot[1] = column;
+                            }
+                        }
+                        else if(character == "S") {
+                            SUBMARINE--;
+                            if(SUBMARINE == 0) {
+                                playerShips -= 1;
+                                characterLookingFor = "";
+                                lastShot[0] = -1;
+                                lastShot[1] = -1;
+                            } else {
+                                characterLookingFor = "S";
+                                lastShot[0] = row;
+                                lastShot[1] = column;
+                            }
+                        }
+                        else if(character == "D") {
+                            DESTROYER--;
+                            if(DESTROYER == 0) {
+                                playerShips -= 1;
+                                characterLookingFor = "";
+                                lastShot[0] = -1;
+                                lastShot[1] = -1;
+                            } else {
+                                characterLookingFor = "D";
+                                lastShot[0] = row;
+                                lastShot[1] = column;
+                            }
+                        }
+                    } else playerBoard[row][column] = xchar;
+
+                    updateBoard();
+                    printControls();
+                    whoIsShooting = PLAYER;
+                    if(playerShips != 0) return;
+                    else {
+                        cout << "Enemy wins";
+                        gamePhase = END;
+                        whoIsShooting = NOONE;
+                        return;
+                    }
+                }
+            }
+
         } else {
             row = lastShot[0];
             column = lastShot[1];
-            string character = playerBoard[row-1][column];
 
-            if(shotDirection == UNKNOWN) {
-                if(row-1 >= 0 && character == characterLookingFor) {
-                    shotDirection = VERTICAL_UP;
+            while(whoIsShooting == ENEMY) {
+                if(shotDirection == UNKNOWN) {
+                    if (row - 1 > -1 && playerBoard[row - 1][column] != "X" && playerBoard[row - 1][column] != xchar) {
+                        if (playerBoard[row - 1][column] == characterLookingFor) {
+                            if (characterLookingFor == "C") {
+                                CARRIER--;
+                                if (CARRIER == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "B") {
+                                BATTLESHIP--;
+                                if (BATTLESHIP == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "R") {
+                                CRUISER--;
+                                if (CRUISER == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "S") {
+                                SUBMARINE--;
+                                if (SUBMARINE == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "D") {
+                                DESTROYER--;
+                                if (DESTROYER == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            }
+                            playerBoard[row - 1][column] = "X";
+                            if (row - 1 == 0) shotDirection = VERTICAL_DOWN;
+                            else {
+                                shotDirection = VERTICAL_UP;
+                                lastShot[0] = row - 1;
+                            }
+                            updateBoard();
+                            printControls();
+                            whoIsShooting = PLAYER;
+                            if (playerShips != 0) return;
+                            else if (enemyShips == 0) {
+                                cout << "Enemy wins";
+                                gamePhase = END;
+                                whoIsShooting = NOONE;
+                                return;
+                            }
 
-                    if(row-1 == 0) {
-                        if((character == "C" && CARRIER != 0) || (character == "B" && BATTLESHIP != 0) || (character == "R" && CRUISER != 0) || (character == "S" && SUBMARINE != 0) || (character == "D" && DESTROYER != 0)) shotDirection = VERTICAL_DOWN;
-                        else if((character == "C" && CARRIER == 0) || (character == "B" && BATTLESHIP == 0) || (character == "R" && CRUISER == 0) || (character == "S" && SUBMARINE == 0) || (character == "D" && DESTROYER == 0)) {
-
+                        } else if (playerBoard[row - 1][column] == dot) {
+                            playerBoard[row - 1][column] = xchar;
+                            updateBoard();
+                            printControls();
+                            whoIsShooting = PLAYER;
+                            if (playerShips != 0) return;
+                            else if (enemyShips == 0) {
+                                cout << "Enemy wins";
+                                gamePhase = END;
+                                whoIsShooting = NOONE;
+                                return;
+                            }
                         }
                     }
-                    row -= 1;
-                } else if(row+1 <= 9 && character == characterLookingFor) {
-                    shotDirection = VERTICAL_DOWN;
-                    row += 1;
 
-                } else if(column-1 <= 9 && character == characterLookingFor) {
-                    shotDirection = HORIZONTAL_LEFT;
-                    column -= 1;
+                    if (row + 1 < 10 && playerBoard[row + 1][column] != "X" && playerBoard[row + 1][column] != xchar) {
+                        if (playerBoard[row + 1][column] == characterLookingFor) {
+                            if (characterLookingFor == "C") {
+                                CARRIER--;
+                                if (CARRIER == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "B") {
+                                BATTLESHIP--;
+                                if (BATTLESHIP == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "R") {
+                                CRUISER--;
+                                if (CRUISER == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "S") {
+                                SUBMARINE--;
+                                if (SUBMARINE == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "D") {
+                                DESTROYER--;
+                                if (DESTROYER == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            }
+                            playerBoard[row + 1][column] = "X";
+                            if (row + 1 == 9) shotDirection = VERTICAL_UP;
+                            else {
+                                shotDirection = VERTICAL_DOWN;
+                                lastShot[0] = row + 1;
+                            }
+                            updateBoard();
+                            printControls();
+                            whoIsShooting = PLAYER;
+                            if (playerShips != 0) return;
+                            else if (enemyShips == 0) {
+                                cout << "Enemy wins";
+                                gamePhase = END;
+                                whoIsShooting = NOONE;
+                                return;
+                            }
 
-                } else if(column+1 <= 9 && character == characterLookingFor) {
-                    shotDirection = HORIZONTAL_RIGHT;
-                    column += 1;
+                        } else if (playerBoard[row + 1][column] == dot) {
+                            playerBoard[row + 1][column] = xchar;
+                            updateBoard();
+                            printControls();
+                            whoIsShooting = PLAYER;
+                            if (playerShips != 0) return;
+                            else if (enemyShips == 0) {
+                                cout << "Enemy wins";
+                                gamePhase = END;
+                                whoIsShooting = NOONE;
+                                return;
+                            }
+                        }
+                    }
+                    if (column - 1 > -1 && playerBoard[row][column - 1] != "X" &&
+                        playerBoard[row][column - 1] != xchar) {
+                        if (playerBoard[row][column - 1] == characterLookingFor) {
+                            if (characterLookingFor == "C") {
+                                CARRIER--;
+                                if (CARRIER == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "B") {
+                                BATTLESHIP--;
+                                if (BATTLESHIP == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "R") {
+                                CRUISER--;
+                                if (CRUISER == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "S") {
+                                SUBMARINE--;
+                                if (SUBMARINE == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "D") {
+                                DESTROYER--;
+                                if (DESTROYER == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            }
+                            playerBoard[row][column - 1] = "X";
+                            if (column - 1 == 0) shotDirection = HORIZONTAL_RIGHT;
+                            else {
+                                shotDirection = HORIZONTAL_LEFT;
+                                lastShot[1] = column - 1;
+                            }
+                            updateBoard();
+                            printControls();
+                            whoIsShooting = PLAYER;
+                            if (playerShips != 0) return;
+                            else if (enemyShips == 0) {
+                                cout << "Enemy wins";
+                                gamePhase = END;
+                                whoIsShooting = NOONE;
+                                return;
+                            }
+
+                        } else if (playerBoard[row][column - 1] == dot) {
+                            playerBoard[row][column - 1] = xchar;
+                            updateBoard();
+                            printControls();
+                            whoIsShooting = PLAYER;
+                            if (playerShips != 0) return;
+                            else if (enemyShips == 0) {
+                                cout << "Enemy wins";
+                                gamePhase = END;
+                                whoIsShooting = NOONE;
+                                return;
+                            }
+                        }
+                    }
+                    if (column + 1 < 10 && playerBoard[row][column + 1] != "X" &&
+                        playerBoard[row][column + 1] != xchar) {
+                        if (playerBoard[row][column + 1] == characterLookingFor) {
+                            if (characterLookingFor == "C") {
+                                CARRIER--;
+                                if (CARRIER == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "B") {
+                                BATTLESHIP--;
+                                if (BATTLESHIP == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "R") {
+                                CRUISER--;
+                                if (CRUISER == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "S") {
+                                SUBMARINE--;
+                                if (SUBMARINE == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            } else if (characterLookingFor == "D") {
+                                DESTROYER--;
+                                if (DESTROYER == 0) {
+                                    playerShips -= 1;
+                                    characterLookingFor = "";
+                                    lastShot[0] = -1;
+                                }
+                            }
+                            playerBoard[row][column + 1] = "X";
+                            if (column + 1 == 9) shotDirection = HORIZONTAL_LEFT;
+                            else {
+                                shotDirection = HORIZONTAL_RIGHT;
+                                lastShot[1] = column + 1;
+                            }
+                            updateBoard();
+                            printControls();
+                            whoIsShooting = PLAYER;
+                            if (playerShips != 0) return;
+                            else if (enemyShips == 0) {
+                                cout << "Enemy wins";
+                                gamePhase = END;
+                                whoIsShooting = NOONE;
+                                return;
+                            }
+
+                        } else if (playerBoard[row][column + 1] == dot) {
+                            playerBoard[row][column + 1] = xchar;
+                            updateBoard();
+                            printControls();
+                            whoIsShooting = PLAYER;
+                            if (playerShips != 0) return;
+                            else if (enemyShips == 0) {
+                                cout << "Enemy wins";
+                                gamePhase = END;
+                                whoIsShooting = NOONE;
+                                return;
+                            }
+                        }
+
+                    }
+                } else if(shotDirection == VERTICAL_UP) {
+
+                } else if(shotDirection == VERTICAL_DOWN) {
+
+                } else if(shotDirection == HORIZONTAL_LEFT) {
+
+                } else if(shotDirection == HORIZONTAL_RIGHT) {
 
                 }
-
-            } else if(shotDirection == VERTICAL_UP) {
-
-
-            } else if(shotDirection == VERTICAL_DOWN) {
-
-
-            } else if(shotDirection == HORIZONTAL_RIGHT) {
-
-
-            } else if(shotDirection == HORIZONTAL_LEFT) {
-
 
             }
         }
 
-//        while(whoIsShooting == ENEMY) {
-//            string character = playerBoard[row][column];
-//            if(character != xchar && character != "X") {
-//                if(character == "C" || character == "B" || character == "R" || character == "S" || character == "D") {
-//                    playerBoard[row][column] = "X";
-//
-//                    if(character == "C") {
-//                        CARRIER--;
-//                        if(CARRIER == 0) playerShips -= 1;
-//                        characterLookingFor = "C";
-//                    }
-//                    else if(character == "B") {
-//                        BATTLESHIP--;
-//                        if(BATTLESHIP == 0) playerShips -= 1;
-//                        characterLookingFor = "B";
-//                    }
-//                    else if(character == "R") {
-//                        CRUISER--;
-//                        if(CRUISER == 0) playerShips -= 1;
-//                        characterLookingFor = "R";
-//                    }
-//                    else if(character == "S") {
-//                        SUBMARINE--;
-//                        if(SUBMARINE == 0) playerShips -= 1;
-//                        characterLookingFor = "S";
-//                    }
-//                    else if(character == "D") {
-//                        DESTROYER--;
-//                        if(DESTROYER == 0) playerShips -= 1;
-//                        characterLookingFor = "D";
-//                    }
-//                } else playerBoard[row][column] = xchar;
-//
-//                updateBoard();
-//                printControls();
-//                whoIsShooting = PLAYER;
-//                if(playerShips != 0) return;
-//                else if(enemyShips == 0) {
-//                    cout << "Enemy wins";
-//                    gamePhase = END;
-//                    whoIsShooting = NOONE;
-//                    return;
-//                }
-//            }
-//        }
+
 
     };
 

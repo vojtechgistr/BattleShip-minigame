@@ -4,4 +4,4 @@ Battleship (also known as Battleships or Sea Battle) is a strategy type guessing
 STILL IN PROGRESS
 
 ## TO DO:
-- ADD: *Logic of shooting for the enemy (currently only random)* completed 50% +-
+- ADD: *Logic of shooting for the enemy (currently only random)*  **completed 50% +-**

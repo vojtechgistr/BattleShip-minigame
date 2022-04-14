@@ -581,7 +581,7 @@ private:
                                 }
                             }
                             playerBoard[row - 1][column] = "X";
-                            if (row - 1 == 0) shotDirection = VERTICAL_DOWN;
+                            if (row - 1 <= 0) shotDirection = VERTICAL_DOWN;
                             else {
                                 shotDirection = VERTICAL_UP;
                                 lastShot[0] = row - 1;
@@ -647,7 +647,7 @@ private:
                                 }
                             }
                             playerBoard[row + 1][column] = "X";
-                            if (row + 1 == 9) shotDirection = VERTICAL_UP;
+                            if (row + 1 >= 9) shotDirection = VERTICAL_UP;
                             else {
                                 shotDirection = VERTICAL_DOWN;
                                 lastShot[0] = row + 1;
@@ -712,7 +712,7 @@ private:
                                 }
                             }
                             playerBoard[row][column - 1] = "X";
-                            if (column - 1 == 0) shotDirection = HORIZONTAL_RIGHT;
+                            if (column - 1 <= 0) shotDirection = HORIZONTAL_RIGHT;
                             else {
                                 shotDirection = HORIZONTAL_LEFT;
                                 lastShot[1] = column - 1;
@@ -738,8 +738,8 @@ private:
                             }
                         }
                     }
-                    if (column + 1 < 10 && playerBoard[row][column + 1] != "X" &&
-                        playerBoard[row][column + 1] != xchar) {
+
+                    if (column + 1 < 10 && playerBoard[row][column + 1] != "X" && playerBoard[row][column + 1] != xchar) {
                         if (playerBoard[row][column + 1] == characterLookingFor) {
                             if (characterLookingFor == "C") {
                                 CARRIER--;
@@ -778,7 +778,7 @@ private:
                                 }
                             }
                             playerBoard[row][column + 1] = "X";
-                            if (column + 1 == 9) shotDirection = HORIZONTAL_LEFT;
+                            if (column + 1 >= 9) shotDirection = HORIZONTAL_LEFT;
                             else {
                                 shotDirection = HORIZONTAL_RIGHT;
                                 lastShot[1] = column + 1;
@@ -806,7 +806,7 @@ private:
 
                     }
                 } else if(shotDirection == VERTICAL_UP) {
-                    if(row-1 < 10 && playerBoard[row-1][column] != "X" && playerBoard[row-1][column] != xchar) {
+                    if(row - 1 > -1 && playerBoard[row - 1][column] != "X" && playerBoard[row - 1][column] != xchar) {
                         if (playerBoard[row-1][column] == characterLookingFor) {
                             if (characterLookingFor == "C") {
                                 CARRIER--;
@@ -849,11 +849,11 @@ private:
                                     shotDirection = UNKNOWN;
                                 }
                             }
-                            playerBoard[row-1][column] = "X";
-                            if(shotDirection != UNKNOWN) {
-                                if (row-1 == 0) shotDirection = VERTICAL_UP;
+                            playerBoard[row - 1][column] = "X";
+                            if (shotDirection != UNKNOWN) {
+                                if (row - 1 <= 0) shotDirection = VERTICAL_DOWN;
                                 else {
-                                    shotDirection = VERTICAL_DOWN;
+                                    shotDirection = VERTICAL_UP;
                                     lastShot[0] = row - 1;
                                 }
                             }
@@ -866,7 +866,7 @@ private:
                                 return;
                             }
 
-                        } else if (playerBoard[row-1][column] == dot) {
+                        } else if (playerBoard[row - 1][column] == dot) {
                             playerBoard[row-1][column] = xchar;
                             updateBoard();
                             printControls();
@@ -876,7 +876,7 @@ private:
                                 printWinner("enemy");
                                 return;
                             }
-                        }
+                        } else shotDirection = VERTICAL_DOWN;
 
                     } else {
                         if(row-1 > -1 && playerBoard[row-1][column] == "X") {
@@ -933,7 +933,7 @@ private:
                             }
                             playerBoard[row+1][column] = "X";
                             if(shotDirection != UNKNOWN) {
-                                if (row+1 == 9) shotDirection = VERTICAL_UP;
+                                if (row+1 >= 9) shotDirection = VERTICAL_UP;
                                 else {
                                     shotDirection = VERTICAL_DOWN;
                                     lastShot[0] = row + 1;
@@ -958,7 +958,7 @@ private:
                                 printWinner("enemy");
                                 return;
                             }
-                        }
+                        } else shotDirection = VERTICAL_UP;
 
                     } else {
                         if(row+1 < 10 && playerBoard[row+1][column] == "X") {
@@ -1015,7 +1015,7 @@ private:
                             }
                             playerBoard[row][column-1] = "X";
                             if(shotDirection != UNKNOWN) {
-                                if (column-1 == 0) shotDirection = HORIZONTAL_RIGHT;
+                                if (column-1 <= 0) shotDirection = HORIZONTAL_RIGHT;
                                 else {
                                     shotDirection = HORIZONTAL_LEFT;
                                     lastShot[1] = column - 1;
@@ -1041,7 +1041,7 @@ private:
                                 printWinner("enemy");
                                 return;
                             }
-                        }
+                        } else shotDirection = HORIZONTAL_RIGHT;
 
                     } else {
                         if(column-1 > -1 && playerBoard[row][column-1] == "X") {
@@ -1098,7 +1098,7 @@ private:
                             }
                             playerBoard[row][column+1] = "X";
                             if(shotDirection != UNKNOWN) {
-                                if (column+1 == 9) shotDirection = HORIZONTAL_LEFT;
+                                if (column+1 >= 9) shotDirection = HORIZONTAL_LEFT;
                                 else {
                                     shotDirection = HORIZONTAL_RIGHT;
                                     lastShot[1] = column + 1;
@@ -1123,7 +1123,7 @@ private:
                                 printWinner("enemy");
                                 return;
                             }
-                        }
+                        } else shotDirection = HORIZONTAL_LEFT;
 
                     } else {
                         if(column+1 < 10 && playerBoard[row][column+1] == "X") {
@@ -1647,7 +1647,6 @@ int main() {
             BattleShipMinigame game;
             game.start();
             string t;
-            cout << "\nPress ENTER to exit..";
             cin >> t;
             return 0;
         } catch (const std::bad_alloc&) {

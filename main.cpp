@@ -254,6 +254,116 @@ private:
         }
     };
 
+    void printWinner(const string &winner) {
+        clearScreen();
+        if(winner == "player") {
+            cout << "$$$$$$$\\  $$\\                                                             $$\\                     \n"
+                    "$$  __$$\\ $$ |                                                            \\__|                    \n"
+                    "$$ |  $$ |$$ | $$$$$$\\  $$\\   $$\\  $$$$$$\\   $$$$$$\\        $$\\  $$\\  $$\\ $$\\ $$$$$$$\\   $$$$$$$\\ \n"
+                    "$$$$$$$  |$$ | \\____$$\\ $$ |  $$ |$$  __$$\\ $$  __$$\\       $$ | $$ | $$ |$$ |$$  __$$\\ $$  _____|\n"
+                    "$$  ____/ $$ | $$$$$$$ |$$ |  $$ |$$$$$$$$ |$$ |  \\__|      $$ | $$ | $$ |$$ |$$ |  $$ |\\$$$$$$\\  \n"
+                    "$$ |      $$ |$$  __$$ |$$ |  $$ |$$   ____|$$ |            $$ | $$ | $$ |$$ |$$ |  $$ | \\____$$\\ \n"
+                    "$$ |      $$ |\\$$$$$$$ |\\$$$$$$$ |\\$$$$$$$\\ $$ |            \\$$$$$\\$$$$  |$$ |$$ |  $$ |$$$$$$$  |\n"
+                    "\\__|      \\__| \\_______| \\____$$ | \\_______|\\__|             \\_____\\____/ \\__|\\__|  \\__|\\_______/ \n"
+                    "                        $$\\   $$ |                                                                \n"
+                    "                        \\$$$$$$  |                                                                \n"
+                    "                         \\______/                                                                 \n\n----------------- ";
+
+        } else if(winner == "enemy") {
+            cout << "$$$$$$$$\\                                                                 $$\\                     \n"
+                    "$$  _____|                                                                \\__|                    \n"
+                    "$$ |      $$$$$$$\\   $$$$$$\\  $$$$$$\\$$$$\\  $$\\   $$\\       $$\\  $$\\  $$\\ $$\\ $$$$$$$\\   $$$$$$$\\ \n"
+                    "$$$$$\\    $$  __$$\\ $$  __$$\\ $$  _$$  _$$\\ $$ |  $$ |      $$ | $$ | $$ |$$ |$$  __$$\\ $$  _____|\n"
+                    "$$  __|   $$ |  $$ |$$$$$$$$ |$$ / $$ / $$ |$$ |  $$ |      $$ | $$ | $$ |$$ |$$ |  $$ |\\$$$$$$\\  \n"
+                    "$$ |      $$ |  $$ |$$   ____|$$ | $$ | $$ |$$ |  $$ |      $$ | $$ | $$ |$$ |$$ |  $$ | \\____$$\\ \n"
+                    "$$$$$$$$\\ $$ |  $$ |\\$$$$$$$\\ $$ | $$ | $$ |\\$$$$$$$ |      \\$$$$$\\$$$$  |$$ |$$ |  $$ |$$$$$$$  |\n"
+                    "\\________|\\__|  \\__| \\_______|\\__| \\__| \\__| \\____$$ |       \\_____\\____/ \\__|\\__|  \\__|\\_______/ \n"
+                    "                                            $$\\   $$ |                                            \n"
+                    "                                            \\$$$$$$  |                                            \n"
+                    "                                             \\______/                                             \n\n----------------- ";
+        }
+
+        SetConsoleTextAttribute(hConsole, 15);
+        cout << "YOUR BOARD";
+        SetConsoleTextAttribute(hConsole, 7);
+        cout << " ------------------                        ------------------ ";
+        SetConsoleTextAttribute(hConsole, 15);
+        cout << "ENEMY BOARD";
+        SetConsoleTextAttribute(hConsole, 7);
+        cout << " ----------------\n|";
+
+        SetConsoleTextAttribute(hConsole, 8);
+        cout << "      A   B   C   D   E   F   G   H   I   J  ";
+        SetConsoleTextAttribute(hConsole, 7);
+        cout << "|                        |";
+        SetConsoleTextAttribute(hConsole, 8);
+        cout << "      A   B   C   D   E   F   G   H   I   J  ";
+        SetConsoleTextAttribute(hConsole, 7);
+        cout << "|\n|---------------------------------------------|                        |---------------------------------------------|\n";
+
+        for (int row = 0; row<10; row++) {
+            cout << "| ";
+            SetConsoleTextAttribute(hConsole, 8);
+            cout << row;
+            SetConsoleTextAttribute(hConsole, 7);
+            cout << " |";
+
+            // player board
+            for (int column = 0; column < 10; column++) {
+                string ship = playerBoard[row][column];
+                if(ship == "C") SetConsoleTextAttribute(hConsole, 16);
+                if(ship == "B") SetConsoleTextAttribute(hConsole, 48);
+                if(ship == "R") SetConsoleTextAttribute(hConsole, 63);
+                if(ship == "S") SetConsoleTextAttribute(hConsole, 144);
+                if(ship == "D") SetConsoleTextAttribute(hConsole, 160);
+                if(ship == "X") {
+                    SetConsoleTextAttribute(hConsole, 12);
+                    cout << "  X ";
+                } else if(ship == xchar) cout << "  " << xchar << " ";
+                else cout << "  " << ship << " ";
+
+                SetConsoleTextAttribute(hConsole, 7);
+            }
+            cout << " |                        | ";
+            SetConsoleTextAttribute(hConsole, 8);
+            cout << row;
+            SetConsoleTextAttribute(hConsole, 7);
+            cout << " |";
+
+            // enemy board
+            for (int column = 0; column < 10; column++) {
+                string ship = enemyBoard[row][column];
+                if(ship == "C") SetConsoleTextAttribute(hConsole, 16);
+                if(ship == "B") SetConsoleTextAttribute(hConsole, 48);
+                if(ship == "R") SetConsoleTextAttribute(hConsole, 63);
+                if(ship == "S") SetConsoleTextAttribute(hConsole, 144);
+                if(ship == "D") SetConsoleTextAttribute(hConsole, 160);
+                if(ship == "X") {
+                    SetConsoleTextAttribute(hConsole, 12);
+                    cout << "  X ";
+                } else if(ship == xchar) cout << "  " << xchar << " ";
+                else cout << "  " << ship << " ";
+
+                SetConsoleTextAttribute(hConsole, 7);
+            }
+            cout << " |\n";
+        }
+
+        cout << "----------------- ";
+        SetConsoleTextAttribute(hConsole, 15);
+        cout << playerShips;
+        SetConsoleTextAttribute(hConsole, 7);
+        cout << " SHIPS LEFT ----------------";
+        cout << "                        ----------------- " ;
+        SetConsoleTextAttribute(hConsole, 15);
+        cout << enemyShips;
+        SetConsoleTextAttribute(hConsole, 7);
+        cout << " SHIPS LEFT ----------------\n\n";
+
+        gamePhase = END;
+        whoIsShooting = NOONE;
+
+    }
     void printControls() {
         if(gamePhase == BUILDING) {
             cout << "Currently building ship: ";
@@ -325,9 +435,7 @@ private:
                         whoIsShooting = ENEMY;
                         if(enemyShips != 0) return;
                         else if(enemyShips == 0) {
-                            cout << "Player wins";
-                            gamePhase = END;
-                            whoIsShooting = NOONE;
+                            printWinner("player");
                             return;
                         }
                     }
@@ -422,9 +530,7 @@ private:
                     whoIsShooting = PLAYER;
                     if(playerShips != 0) return;
                     else {
-                        cout << "Enemy wins";
-                        gamePhase = END;
-                        whoIsShooting = NOONE;
+                        printWinner("enemy");
                         return;
                     }
                 }
@@ -484,10 +590,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
 
@@ -497,10 +601,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
                         }
@@ -554,10 +656,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
 
@@ -567,10 +667,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
                         }
@@ -623,10 +721,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
 
@@ -636,10 +732,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
                         }
@@ -693,10 +787,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
 
@@ -706,10 +798,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
                         }
@@ -771,10 +861,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
 
@@ -784,10 +872,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
                         }
@@ -857,10 +943,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
 
@@ -870,10 +954,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
                         }
@@ -944,10 +1026,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
 
@@ -957,10 +1037,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
                         }
@@ -1030,10 +1108,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
 
@@ -1043,10 +1119,8 @@ private:
                             printControls();
                             whoIsShooting = PLAYER;
                             if (playerShips != 0) return;
-                            else if (enemyShips == 0) {
-                                cout << "Enemy wins";
-                                gamePhase = END;
-                                whoIsShooting = NOONE;
+                            else if (playerShips == 0) {
+                                printWinner("enemy");
                                 return;
                             }
                         }
@@ -1572,7 +1646,10 @@ int main() {
         try {
             BattleShipMinigame game;
             game.start();
-            break;
+            string t;
+            cout << "\nPress ENTER to exit..";
+            cin >> t;
+            return 0;
         } catch (const std::bad_alloc&) {
             // bad allocation, trying again
             clearScreen();

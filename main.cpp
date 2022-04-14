@@ -10,7 +10,10 @@
 #define dot string(1, (char)250)
 #define xchar string(1, (char)120)
 
-using std::cout, std::cin, std::string, std::array;
+using std::cout;
+using std::cin;
+using std::string;
+using std::array;
 
 static void clearScreen() {
     HANDLE                     hStdOut;
@@ -258,10 +261,11 @@ private:
             cout << listOfAllShips[shipIndex];
             SetConsoleTextAttribute(hConsole, 10);
 
-            cout << "       \n\nW = UP                     C - CHANGE TYPE OF A SHIP\n"
-                    "S = DOWN                   F2 - SAVE BOARD - START GAME\n"
-                    "A = LEFT                   ESC - END GAME\n"
-                    "D = RIGHT\n";
+            cout << "       \n\n"
+                    "W = UP                     ENTER - PLACE A SHIP\n"
+                    "S = DOWN                   C - CHANGE TYPE OF A SHIP\n"
+                    "A = LEFT                   F2 - SAVE BOARD - START GAME\n"
+                    "D = RIGHT                  ESC - END GAME\n";
 
             SetConsoleTextAttribute(hConsole, 7);
         }

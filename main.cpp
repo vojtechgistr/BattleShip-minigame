@@ -447,6 +447,7 @@ private:
     void enemyShooting() {
         int row;
         int column;
+        unsigned short int tries = 0;
 
         if(lastShot[0] == -1) {
             while(whoIsShooting == ENEMY) {
@@ -803,8 +804,8 @@ private:
                                 return;
                             }
                         }
-
                     }
+
                 } else if(shotDirection == VERTICAL_UP) {
                     if(row - 1 > -1 && playerBoard[row - 1][column] != "X" && playerBoard[row - 1][column] != xchar) {
                         if (playerBoard[row-1][column] == characterLookingFor) {
@@ -1136,6 +1137,13 @@ private:
 
                 }
 
+                if(tries >= 10) {
+                    characterLookingFor = "";
+                    lastShot[0] = -1;
+                    shotDirection = UNKNOWN;
+                    enemyShooting();
+                    return;
+                } else tries++;
             }
         }
 

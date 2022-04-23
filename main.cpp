@@ -122,12 +122,12 @@ private:
 
         /* check if same ship type is around */
         if(lastCursorPosition[0]+1 <= 9 && playerBoard[lastCursorPosition[0]+1][lastCursorPosition[1]] == shipIndicator) {
-            if((lastCursorPosition[1]+1 <= 9 && playerBoard[lastCursorPosition[0]+1][lastCursorPosition[1]+1] == shipIndicator) || (lastCursorPosition[1-1] >= 0 && playerBoard[lastCursorPosition[0]+1][lastCursorPosition[1]-1] == shipIndicator))
+            if((lastCursorPosition[1]+1 <= 9 && playerBoard[lastCursorPosition[0]+1][lastCursorPosition[1]+1] == shipIndicator) || (lastCursorPosition[1]-1 >= 0 && playerBoard[lastCursorPosition[0]+1][lastCursorPosition[1]-1] == shipIndicator))
                 return false; // bad direction
             else return true;
 
         } else if(lastCursorPosition[0]-1 >= 0 && playerBoard[lastCursorPosition[0]-1][lastCursorPosition[1]] == shipIndicator) {
-            if((lastCursorPosition[1]+1 <= 9 && playerBoard[lastCursorPosition[0]-1][lastCursorPosition[1]+1] == shipIndicator) || (lastCursorPosition[1-1] >= 0 && playerBoard[lastCursorPosition[0]-1][lastCursorPosition[1]-1] == shipIndicator))
+            if((lastCursorPosition[1]+1 <= 9 && playerBoard[lastCursorPosition[0]-1][lastCursorPosition[1]+1] == shipIndicator) || (lastCursorPosition[1]-1 >= 0 && playerBoard[lastCursorPosition[0]-1][lastCursorPosition[1]-1] == shipIndicator))
                 return false; // bad direction
             else return true;
 

@@ -5,23 +5,23 @@
 #include <array>
 
 #define square	std::string(1, (char)254)
-#define dot		std::string(1, (char)250)
+#define dot	std::string(1, (char)250)
 #define xchar	std::string(1, (char)120)
 
 #define SET_CONSOLE_CHARACTER_GRAY			SetConsoleTextAttribute(hConsole, 7);
-#define SET_CONSOLE_CHARACTER_DARKGREY		SetConsoleTextAttribute(hConsole, 8);
+#define SET_CONSOLE_CHARACTER_DARKGREY			SetConsoleTextAttribute(hConsole, 8);
 #define SET_CONSOLE_CHARACTER_BLUE			SetConsoleTextAttribute(hConsole, 9);
 #define SET_CONSOLE_CHARACTER_GREEN			SetConsoleTextAttribute(hConsole, 10);
 #define SET_CONSOLE_CHARACTER_RED			SetConsoleTextAttribute(hConsole, 12);
 #define SET_CONSOLE_CHARACTER_WHITE			SetConsoleTextAttribute(hConsole, 15);
 
-//					 BACKGROUND COLOR _ CHARACTER COLOR 
+//	    BACKGROUND COLOR _ CHARACTER COLOR 
 #define SET_CONSOLE_CHARACTER_DARKBLUE_BLACK				SetConsoleTextAttribute(hConsole, 16);
 #define SET_CONSOLE_CHARACTER_LIGHTBLUE_BLACK				SetConsoleTextAttribute(hConsole, 48);
 #define SET_CONSOLE_CHARACTER_LIGHTBLUE_WHITE				SetConsoleTextAttribute(hConsole, 63);
 #define SET_CONSOLE_CHARACTER_LIGHTGRAY_BLACK				SetConsoleTextAttribute(hConsole, 112);
-#define SET_CONSOLE_CHARACTER_BLUE_BLACK					SetConsoleTextAttribute(hConsole, 144);
-#define SET_CONSOLE_CHARACTER_GREEN_BLACK					SetConsoleTextAttribute(hConsole, 160);
+#define SET_CONSOLE_CHARACTER_BLUE_BLACK				SetConsoleTextAttribute(hConsole, 144);
+#define SET_CONSOLE_CHARACTER_GREEN_BLACK				SetConsoleTextAttribute(hConsole, 160);
 
 	
 class BattleshipMinigame {
@@ -79,7 +79,7 @@ private:
 	unsigned short int CARRIER = 0, BATTLESHIP = 0, CRUISER = 0, SUBMARINE = 0, DESTROYER = 0,
 		enemyCARRIER = 0, enemyBATTLESHIP = 0, enemyCRUISER = 0, enemySUBMARINE = 0, enemyDESTROYER = 0;
 
-	std::array<int, 2> lastCursorPosition = { 0, 0 };		// [0] = vertical, [1] = horizontal
+	std::array<int, 2> lastCursorPosition = { 0, 0 };			// [0] = vertical, [1] = horizontal
 	std::array<int, 2> lastShot = { -1, -1 };				// Store an enemy shot to the player
 
 	std::string characterLookingFor = "";

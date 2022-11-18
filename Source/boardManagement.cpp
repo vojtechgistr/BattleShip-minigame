@@ -7,6 +7,9 @@ void BattleshipMinigame::start()
     createBoard();
 }
 
+// test case
+int testyawdwad = 0;
+
 void BattleshipMinigame::clearScreen()
 {
     HANDLE                     hStdOut;
